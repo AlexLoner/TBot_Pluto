@@ -1,9 +1,7 @@
-import json
 import time
-from datetime import datetime
-
 import configuration as cfg
 import requests
+from datetime import datetime
 from db_files.entity import Requests
 
 
@@ -67,7 +65,7 @@ class Tbot:
         if cmd == '/start':
             response = f"Hello, {first_name}!\nI'm bot {self.bot_name}.\n\nYou can send me a link and i'll " \
                        f"make a short version of it for you. \nYou are also welcome to use the command /history " \
-                       f"and i'll show you your last 10 requests."
+                       f"and i'll show you your last 10 requests. Type /help to see info again"
         elif cmd == '/history':
             history = [f"{num :<2})  {value.req_date.strftime('%d.%m.%Y %H:%M:%S')} | {value.short_link :<60}"
                         for num, value in enumerate(self.table.show_history(telegram_id), start=1)]
@@ -76,7 +74,8 @@ class Tbot:
             # Empty history case
             if response == '':
                 response = "You didn't send any requests"
-
+        elif cmd == '/help':
+            response = "1) Send a link to get short version\n2) Call /history to see last 10 requests"
         data = {'chat_id': chat_id, 'text': response}
         requests.post(f"{self.form}sendMessage", data=data)
 
@@ -85,7 +84,7 @@ class Tbot:
         if short_link == "Invalid URL":
             text = f"<{origin_link}> invalid URL"
         else:
-            text = f"Short link <{short_link}>\n Origin link <{origin_link}> "
+            text = f"Short link <{short_link}>"
         data = {'chat_id': chat_id, 'text': text}
         requests.post(f"{self.form}sendMessage", data=data)
 
@@ -104,13 +103,10 @@ class Tbot:
                                               first_name, last_name)
                         self.send_msg(chat_id, origin_link, short_link)
 
-                    print(msg)
-                    print(telegram_id, chat_id, req_date, origin_link, first_name, last_name)
-
 
 # --------------------------------------------------------------------------------------------
 if __name__ == '__main__':
 
     tbot = Tbot()
-    tbot.loop(1.5)
+    tbot.loop(0.5)
 

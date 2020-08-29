@@ -28,5 +28,5 @@ class InitDB:
 # --------------------------------------------------------------------------------------------
 if __name__ == "__main__":
     import configuration as cfg
-    db = InitDB(db_name="test_db", user_name=cfg.user_name, password=cfg.pwd)
+    db = InitDB(db_name=cfg.db_name, user_name=cfg.user_name, password=cfg.pwd)
 

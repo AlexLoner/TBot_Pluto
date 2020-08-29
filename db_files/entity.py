@@ -14,7 +14,7 @@ class Requests(Base):
     telegram_id = Column(Integer, nullable=False)
     chat_id = Column(Integer, nullable=False)
     req_date = Column(DateTime, nullable=False)
-    origin_link = Column(String(255), nullable=False)
+    origin_link = Column(String(2000), nullable=False)
     short_link = Column(String(255), nullable=False)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(150), nullable=True)
