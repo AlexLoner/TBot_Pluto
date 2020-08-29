@@ -29,15 +29,15 @@ class THistory:
         self.base.session.commit()
 
     # ----------------------------------------------------------------------------------------
-    def update(self):
-        return self.base.session.query(Requests).all()
+    def show_history(self, telegram_id):
+        return self.base.session.query(Requests).filter(Requests.telegram_id == telegram_id).all()
 
     # ----------------------------------------------------------------------------------------
     def check(self, telegram_id):
         """ Checking that only 10 requests from one user are stored"""
-        lst = self.base.session.query(Requests).filter(Requests.telegram_id == telegram_id).all()
+        lst = self.show_history(telegram_id)
         if len(lst) > 10:
-            lower_id = lst[len(lst)-10].id
+            lower_id = lst[1].id
             self.delete_request(lower_id)
 
 

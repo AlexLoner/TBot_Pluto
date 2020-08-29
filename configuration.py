@@ -8,3 +8,5 @@ short_link_request = 'https://rel.ink/api/links/'
 # mysql
 user_name = 'alexl'
 pwd = 'password'
+db_name = 'test_db'
+

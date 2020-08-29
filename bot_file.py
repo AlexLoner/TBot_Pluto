@@ -41,7 +41,10 @@ class Tbot:
         req_date = datetime.fromtimestamp(msg['message']['date'])
         origin_link = msg['message']['text']
         first_name = msg['message']['from']['first_name']
-        last_name = msg['message']['from']['last_name']
+        try:
+            last_name = msg['message']['from']['last_name']
+        except KeyError:
+            last_name = None
         return telegram_id, chat_id, req_date, origin_link, first_name, last_name
 
     # --------------------------------------------------------------------------------------------
@@ -60,22 +63,30 @@ class Tbot:
         self.table.add_request(req)
 
     # --------------------------------------------------------------------------------------------
-    def bot_cmds_responses(self, cmd, chat_id, **kw):
+    def bot_cmds_responses(self, cmd, chat_id, first_name, telegram_id):
         if cmd == '/start':
-            response = f"Hello, {kw['first_name']}!\nI'm bot {self.bot_name}.\n\nYou can send me a link and i'll " \
+            response = f"Hello, {first_name}!\nI'm bot {self.bot_name}.\n\nYou can send me a link and i'll " \
                        f"make a short version of it for you. \nYou are also welcome to use the command /history " \
                        f"and i'll show you your last 10 requests."
         elif cmd == '/history':
             history = [f"{num :<2})  {value.req_date.strftime('%d.%m.%Y %H:%M:%S')} | {value.short_link :<60}"
-                        for num, value in enumerate(self.table.update(), start=1)]
+                        for num, value in enumerate(self.table.show_history(telegram_id), start=1)]
             response = '\n'.join(h for h in history)
-            print(response)
+
+            # Empty history case
+            if response == '':
+                response = "You didn't send any requests"
+
         data = {'chat_id': chat_id, 'text': response}
         requests.post(f"{self.form}sendMessage", data=data)
 
     # --------------------------------------------------------------------------------------------
     def send_msg(self, chat_id, origin_link, short_link):
-        data = {'chat_id': chat_id, 'text': f"Short link <{short_link}>\n Origin link <{origin_link}> "}
+        if short_link == "Invalid URL":
+            text = f"<{origin_link}> invalid URL"
+        else:
+            text = f"Short link <{short_link}>\n Origin link <{origin_link}> "
+        data = {'chat_id': chat_id, 'text': text}
         requests.post(f"{self.form}sendMessage", data=data)
 
     # --------------------------------------------------------------------------------------------
@@ -86,7 +97,7 @@ class Tbot:
                 for msg in msgs['result']:
                     telegram_id, chat_id, req_date, origin_link, first_name, last_name = self.parse_msg(msg)
                     if origin_link in self.bot_cmds:
-                        self.bot_cmds_responses(origin_link, chat_id, first_name=first_name)
+                        self.bot_cmds_responses(origin_link, chat_id, first_name, telegram_id)
                     else:
                         short_link = self.get_short_link(origin_link)
                         self.put_msg_to_dbase(telegram_id, chat_id, req_date, origin_link, short_link,
