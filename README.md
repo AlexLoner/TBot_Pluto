@@ -4,4 +4,6 @@
 
 --- 
  ### How to use
- Change login and password for database in `configuration.py`
+ Change login and password for database in `configuration.py`. 
+ 
+ Python version >= 3.8
