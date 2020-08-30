@@ -37,7 +37,11 @@ class Tbot:
         telegram_id = msg['message']['from']['id']
         chat_id = msg['message']['chat']['id']
         req_date = datetime.fromtimestamp(msg['message']['date'])
-        origin_link = msg['message']['text']
+        # Check that user send a text message
+        try:
+            origin_link = msg['message']['text']
+        except KeyError:
+            origin_link = -1
         first_name = msg['message']['from']['first_name']
         try:
             last_name = msg['message']['from']['last_name']
@@ -95,7 +99,12 @@ class Tbot:
             if msgs := self.check_update():
                 for msg in msgs['result']:
                     telegram_id, chat_id, req_date, origin_link, first_name, last_name = self.parse_msg(msg)
-                    if origin_link in self.bot_cmds:
+                    # Not a text message case
+                    if origin_link == -1:
+                        data = {'chat_id': chat_id, 'text': "Please send a text URL"}
+                        requests.post(f"{self.form}sendMessage", data=data)
+                        continue
+                    elif origin_link in self.bot_cmds:
                         self.bot_cmds_responses(origin_link, chat_id, first_name, telegram_id)
                     else:
                         short_link = self.get_short_link(origin_link)
